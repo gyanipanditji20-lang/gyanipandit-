@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Demo Shop Admin</title>
+<style>
+  :root {
+    --bg: #eef2f5;
+    --surface: #ffffff;
+    --ink: #17232e;
+    --muted: #5a6b79;
+    --line: #d3dce3;
+    --accent: #1c6a86;
+    --accent-ink: #ffffff;
+    --error: #b3261e;
+    --error-bg: #fdecea;
+    color-scheme: light;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #0f1a22;
+      --surface: #17252f;
+      --ink: #e8eef2;
+      --muted: #9fb0bd;
+      --line: #2a3b47;
+      --accent: #5bb5d3;
+      --accent-ink: #08212c;
+      --error: #ff9a92;
+      --error-bg: #3a1b19;
+      color-scheme: dark;
+    }
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; }
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: "Segoe UI", system-ui, -apple-system, Roboto, Arial, sans-serif;
+    line-height: 1.5;
+    min-height: 100vh;
+  }
+  [hidden] { display: none !important; }
+
+  .topbar {
+    display: flex; align-items: center; justify-content: space-between; gap: 16px;
+    padding: 14px 24px; background: var(--surface); border-bottom: 1px solid var(--line);
+  }
+  .brand { font-weight: 700; letter-spacing: 0.01em; }
+  .topbar nav { display: flex; align-items: center; gap: 20px; }
+  .topbar a { color: var(--ink); text-decoration: none; padding: 4px 0; border-bottom: 2px solid transparent; }
+  .topbar a:hover, .topbar a[aria-current="page"] { border-bottom-color: var(--accent); }
+
+  main { max-width: 880px; margin: 0 auto; padding: 32px 20px 64px; }
+
+  .card {
+    background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 28px;
+  }
+  .login-wrap { max-width: 400px; margin: 48px auto 0; }
+  h1 { font-size: 1.6rem; margin: 0 0 6px; }
+  h2 { font-size: 1.2rem; margin: 0 0 12px; }
+  .sub { color: var(--muted); margin: 0 0 22px; }
+
+  label { display: block; font-weight: 600; margin: 16px 0 6px; }
+  input[type="text"], input[type="password"] {
+    width: 100%; padding: 10px 12px; font: inherit; color: var(--ink);
+    background: var(--bg); border: 1px solid var(--line); border-radius: 6px;
+  }
+  input:focus-visible, button:focus-visible, a:focus-visible {
+    outline: 3px solid var(--accent); outline-offset: 2px;
+  }
+  button {
+    font: inherit; font-weight: 600; cursor: pointer; border-radius: 6px; padding: 10px 18px;
+    border: 1px solid var(--accent); background: var(--accent); color: var(--accent-ink);
+  }
+  .login-wrap button { width: 100%; margin-top: 22px; }
+  button.quiet { background: transparent; color: var(--ink); border-color: var(--line); padding: 6px 14px; }
+
+  .error {
+    margin-top: 16px; padding: 10px 12px; border-radius: 6px;
+    background: var(--error-bg); color: var(--error); border: 1px solid var(--error);
+  }
+  .hint { margin: 20px 0 0; color: var(--muted); font-size: 0.9rem; }
+
+  .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 16px; margin-top: 20px; }
+  .stat { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 18px; }
+  .stat .value { font-size: 1.8rem; font-weight: 700; }
+  .stat .name { color: var(--muted); }
+
+  .table-scroll { overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; }
+  th, td { text-align: left; padding: 12px 10px; border-bottom: 1px solid var(--line); }
+  th { color: var(--muted); font-weight: 600; }
+  td.num, th.num { text-align: right; }
+
+  @media (max-width: 520px) {
+    .topbar { padding: 12px 16px; flex-wrap: wrap; }
+    .card { padding: 20px; }
+  }
+</style>
+</head>
+<body>
+
+<header class="topbar" id="topbar" hidden>
+  <span class="brand">Demo Shop Admin</span>
+  <nav aria-label="Main">
+    <a href="#/dashboard" id="nav-dashboard">Overview</a>
+    <a href="#/products" id="nav-products">Products</a>
+    <button type="button" class="quiet" id="logout-btn">Logout</button>
+  </nav>
+</header>
+
+<main>
+  <section id="view-login" class="login-wrap card" aria-labelledby="login-title">
+    <h1 id="login-title">Sign in</h1>
+    <p class="sub">Demo Shop Admin, a practice site for test automation.</p>
+    <form id="login-form" novalidate>
+      <label for="username">Username</label>
+      <input type="text" id="username" name="username" autocomplete="off" placeholder="Enter username">
+
+      <label for="password">Password</label>
+      <input type="password" id="password" name="password" autocomplete="off" placeholder="Enter password">
+
+      <div id="login-error" class="error" role="alert" hidden></div>
+
+      <button type="submit" id="login-btn">Login</button>
+    </form>
+    <p class="hint">Demo account: admin / admin123</p>
+  </section>
+
+  <section id="view-dashboard" hidden>
+    <h1>Dashboard</h1>
+    <p class="sub" id="welcome-text">Welcome back.</p>
+    <div class="stats">
+      <div class="stat"><div class="value">128</div><div class="name">Orders today</div></div>
+      <div class="stat"><div class="value">₹84,500</div><div class="name">Revenue today</div></div>
+      <div class="stat"><div class="value">7</div><div class="name">Open tickets</div></div>
+    </div>
+  </section>
+
+  <section id="view-products" hidden>
+    <h1>Product list</h1>
+    <p class="sub">Items currently on sale in the demo shop.</p>
+    <div class="card table-scroll">
+      <table>
+        <thead>
+          <tr><th>Item</th><th>Category</th><th class="num">Price</th><th class="num">In stock</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Wireless Mouse</td><td>Accessories</td><td class="num">₹799</td><td class="num">42</td></tr>
+          <tr><td>Mechanical Keyboard</td><td>Accessories</td><td class="num">₹3,499</td><td class="num">18</td></tr>
+          <tr><td>USB-C Hub</td><td>Adapters</td><td class="num">₹1,299</td><td class="num">65</td></tr>
+          <tr><td>Laptop Stand</td><td>Furniture</td><td class="num">₹1,899</td><td class="num">0</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+</main>
+
+<script>
+  var VALID_USER = 'admin';
+  var VALID_PASS = 'admin123';
+  var loggedIn = false;
+
+  var views = {
+    login: document.getElementById('view-login'),
+    dashboard: document.getElementById('view-dashboard'),
+    products: document.getElementById('view-products')
+  };
+  var topbar = document.getElementById('topbar');
+  var errorBox = document.getElementById('login-error');
+
+  function show(name) {
+    Object.keys(views).forEach(function (key) {
+      views[key].hidden = key !== name;
+    });
+    topbar.hidden = name === 'login';
+    document.getElementById('nav-dashboard').removeAttribute('aria-current');
+    document.getElementById('nav-products').removeAttribute('aria-current');
+    if (name === 'dashboard') document.getElementById('nav-dashboard').setAttribute('aria-current', 'page');
+    if (name === 'products') document.getElementById('nav-products').setAttribute('aria-current', 'page');
+  }
+
+  function route() {
+    var page = location.hash.replace('#/', '');
+    if (!loggedIn) { show('login'); return; }
+    show(page === 'products' ? 'products' : 'dashboard');
+  }
+
+  document.getElementById('login-form').addEventListener('submit', function (e) {
+    e.preventDefault();
+    var user = document.getElementById('username').value.trim();
+    var pass = document.getElementById('password').value;
+
+    if (!user || !pass) {
+      errorBox.textContent = 'Enter both username and password.';
+      errorBox.hidden = false;
+      return;
+    }
+    if (user === VALID_USER && pass === VALID_PASS) {
+      loggedIn = true;
+      errorBox.hidden = true;
+      document.getElementById('welcome-text').textContent = 'Welcome back, ' + user + '.';
+      location.hash = '#/dashboard';
+      route();
+    } else {
+      errorBox.textContent = 'Invalid credentials. Check the username and password.';
+      errorBox.hidden = false;
+    }
+  });
+
+  document.getElementById('logout-btn').addEventListener('click', function () {
+    loggedIn = false;
+    document.getElementById('username').value = '';
+    document.getElementById('password').value = '';
+    errorBox.hidden = true;
+    location.hash = '';
+    route();
+  });
+
+  window.addEventListener('hashchange', route);
+  route();
+</script>
+</body>
+</html>
